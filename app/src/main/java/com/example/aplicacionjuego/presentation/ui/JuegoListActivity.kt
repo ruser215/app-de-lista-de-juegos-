@@ -8,7 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle // <-- IMPORTACIÓN AÑADIDA
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplicacionjuego.databinding.ActivityJuegoListBinding
 import com.example.aplicacionjuego.databinding.DialogAddJuegoBinding
@@ -36,8 +36,7 @@ class JuegoListActivity : AppCompatActivity() {
             showAddGameDialog()
         }
 
-        // --- OBSERVADORES DEL VIEWMODEL (CON REPEATONLIFECYCLE) ---
-        // Recolectamos los flows de forma segura y eficiente
+        // Unificamos los observadores en un solo bloque
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Observador para la lista de juegos
@@ -52,11 +51,25 @@ class JuegoListActivity : AppCompatActivity() {
                     viewModel.addResult.collect { result ->
                         result?.let {
                             if (it.isSuccess) {
-                                Toast.makeText(this@JuegoListActivity, "Juego añadido correctamente", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@JuegoListActivity, "Juego añadido", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(this@JuegoListActivity, "Error: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@JuegoListActivity, "Error al añadir: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
                             }
-                            viewModel.resetAddResult() // Limpiar el resultado para no volver a mostrar el Toast
+                            viewModel.resetAddResult()
+                        }
+                    }
+                }
+
+                // Observador para el resultado de actualizar un juego
+                launch {
+                    viewModel.updateResult.collect { result ->
+                        result?.let {
+                            if (it.isSuccess) {
+                                Toast.makeText(this@JuegoListActivity, "Estado actualizado", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@JuegoListActivity, "Error al actualizar: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                            }
+                            viewModel.resetUpdateResult()
                         }
                     }
                 }
@@ -65,8 +78,9 @@ class JuegoListActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        // Al hacer clic en un juego, llamamos a la función para mostrar el diálogo de cambio de estado
         juegoAdapter = JuegoAdapter { juego ->
-            // Aquí puedes manejar el clic en un juego (para editarlo, etc.)
+            showChangeStateDialog(juego)
         }
         binding.rvJuegos.apply {
             adapter = juegoAdapter
@@ -93,16 +107,32 @@ class JuegoListActivity : AppCompatActivity() {
                 val estadoSeleccionado = Estado.valueOf(dialogBinding.spinnerEstado.selectedItem.toString())
 
                 if (title.isNotEmpty()) {
-                    val nuevoJuego = Juego(
-                        title = title,
-                        platform = platform,
-                        portada = portada,
-                        estado = estadoSeleccionado
-                    )
+                    val nuevoJuego = Juego(title = title, platform = platform, portada = portada, estado = estadoSeleccionado)
                     viewModel.addJuego(nuevoJuego)
                 } else {
                     Toast.makeText(this, "El título es obligatorio", Toast.LENGTH_SHORT).show()
                 }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    /**
+     * Muestra un diálogo para que el usuario elija un nuevo estado para el juego.
+     */
+    private fun showChangeStateDialog(juego: Juego) {
+        val estados = Estado.values()
+        val estadoNombres = estados.map { it.name }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Cambiar estado de: ${juego.title}")
+            .setItems(estadoNombres) { dialog, which ->
+                val nuevoEstado = estados[which]
+                // Creamos una copia del juego con el nuevo estado
+                val juegoActualizado = juego.copy(estado = nuevoEstado)
+                // Llamamos al ViewModel para que lo actualice
+                viewModel.updateJuego(juegoActualizado)
+                dialog.dismiss()
             }
             .setNegativeButton("Cancelar", null)
             .show()

@@ -16,19 +16,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class JuegoViewModel @Inject constructor(
-    private val getAllGamesUseCase: GetGamesUseCase, 
+    private val getAllGamesUseCase: GetGamesUseCase,
     private val updateGameUseCase: UpdateJuegoUseCase,
     private val addGameUseCase: AddJuedosUseCase
 ) : ViewModel() {
 
     private val _juegos = MutableStateFlow<List<Juego>>(emptyList())
-    val juegos: StateFlow<List<Juego>> get() = _juegos // <-- Cambio aquí
+    val juegos: StateFlow<List<Juego>> get() = _juegos
 
     private val _addResult = MutableStateFlow<Result<Unit>?>(null)
-    val addResult: StateFlow<Result<Unit>?> get() = _addResult // <-- Cambio aquí
+    val addResult: StateFlow<Result<Unit>?> get() = _addResult
 
+    // StateFlow para el resultado de la actualización
     private val _updateResult = MutableStateFlow<Result<Unit>?>(null)
-    val updateResult: StateFlow<Result<Unit>?> get() = _updateResult // <-- Cambio aquí
+    val updateResult: StateFlow<Result<Unit>?> get() = _updateResult
 
     init {
         loadJuegos()
@@ -53,6 +54,9 @@ class JuegoViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Llama al caso de uso para actualizar el juego en el repositorio.
+     */
     fun updateJuego(juego: Juego) {
         viewModelScope.launch {
             val result = updateGameUseCase(juego)
@@ -64,6 +68,10 @@ class JuegoViewModel @Inject constructor(
         _addResult.value = null
     }
 
+    /**
+     * Resetea el estado del resultado de la actualización para evitar que el Toast
+     * se muestre de nuevo (por ejemplo, al girar la pantalla).
+     */
     fun resetUpdateResult() {
         _updateResult.value = null
     }
