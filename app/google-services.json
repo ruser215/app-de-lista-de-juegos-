@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "253361320383",
+    "project_id": "login-con-firebase-c0c28",
+    "storage_bucket": "login-con-firebase-c0c28.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253361320383:android:1f0fa855ce1595b74a710a",
+        "android_client_info": {
+          "package_name": "com.example.aplicacionjuego"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKfrMvdGMn-wfSaCLYzyrl13QOG9Skh54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
