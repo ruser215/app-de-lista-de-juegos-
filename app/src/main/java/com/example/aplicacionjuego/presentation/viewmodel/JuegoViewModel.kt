@@ -20,7 +20,7 @@ class JuegoViewModel @Inject constructor(
     private val getAllGamesUseCase: GetGamesUseCase,
     private val updateGameUseCase: UpdateJuegoUseCase,
     private val addGameUseCase: AddJuedosUseCase,
-    private val deleteJuegoUseCase: DeleteJuegoUseCase // Inyectamos el nuevo caso de uso
+    private val deleteJuegoUseCase: DeleteJuegoUseCase
 ) : ViewModel() {
 
     private val _juegos = MutableStateFlow<List<Juego>>(emptyList())
@@ -32,9 +32,12 @@ class JuegoViewModel @Inject constructor(
     private val _updateResult = MutableStateFlow<Result<Unit>?>(null)
     val updateResult: StateFlow<Result<Unit>?> get() = _updateResult
 
-    // StateFlow para el resultado del borrado
     private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
     val deleteResult: StateFlow<Result<Unit>?> get() = _deleteResult
+
+    // StateFlow para el juego que se está editando
+    private val _juegoSeleccionado = MutableStateFlow<Juego?>(null)
+    val juegoSeleccionado: StateFlow<Juego?> get() = _juegoSeleccionado
 
     init {
         loadJuegos()
@@ -43,36 +46,34 @@ class JuegoViewModel @Inject constructor(
     private fun loadJuegos() {
         viewModelScope.launch {
             getAllGamesUseCase()
-                .catch { e ->
-                    // Manejo de errores
-                }
-                .collect { gameList ->
-                    _juegos.value = gameList
-                }
+                .catch { e -> /* Manejo de errores */ }
+                .collect { _juegos.value = it }
         }
+    }
+
+    /**
+     * Guarda el juego seleccionado para que el fragmento de edición lo observe.
+     * Acepta un valor nulo para poder limpiar la selección.
+     */
+    fun seleccionarJuego(juego: Juego?) {
+        _juegoSeleccionado.value = juego
     }
 
     fun addJuego(juego: Juego) {
         viewModelScope.launch {
-            val result = addGameUseCase(juego)
-            _addResult.value = result
+            _addResult.value = addGameUseCase(juego)
         }
     }
 
     fun updateJuego(juego: Juego) {
         viewModelScope.launch {
-            val result = updateGameUseCase(juego)
-            _updateResult.value = result
+            _updateResult.value = updateGameUseCase(juego)
         }
     }
 
-    /**
-     * Llama al caso de uso para eliminar el juego.
-     */
     fun deleteJuego(juego: Juego) {
         viewModelScope.launch {
-            val result = deleteJuegoUseCase(juego)
-            _deleteResult.value = result
+            _deleteResult.value = deleteJuegoUseCase(juego)
         }
     }
 
@@ -84,9 +85,6 @@ class JuegoViewModel @Inject constructor(
         _updateResult.value = null
     }
 
-    /**
-     * Resetea el estado del resultado del borrado.
-     */
     fun resetDeleteResult() {
         _deleteResult.value = null
     }

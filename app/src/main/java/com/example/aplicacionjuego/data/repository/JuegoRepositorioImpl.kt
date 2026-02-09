@@ -56,11 +56,9 @@ class JuegoRepositorioImpl @Inject constructor() : JuegoRepositorio {
      * Elimina el juego de la lista de modelo y de la fuente de datos JSON.
      */
     override suspend fun deleteJuego(juego: Juego): Result<Unit> {
-        // 1. Eliminamos de la lista de modelo interna
         _juegos.update { list ->
             list.filter { it.id != juego.id }
         }
-        // 2. Eliminamos de la fuente de datos JSON "original"
         val index = Juegos.juegos.indexOfFirst { it.getString("id") == juego.id }
         if (index != -1) {
             Juegos.juegos.removeAt(index)
@@ -77,7 +75,9 @@ private fun JSONObject.toJuego(): Juego {
         title = this.optString("title"),
         platform = this.optString("platform"),
         portada = this.optString("portada"),
-        estado = Estado.valueOf(this.optString("estado", Estado.PENDIENTE.name))
+        estado = Estado.valueOf(this.optString("estado", Estado.PENDIENTE.name)),
+        rating = this.optDouble("rating", 0.0).toFloat(), // Añadimos el mapeo del rating
+        opinion = this.optString("opinion", "") // Añadimos el mapeo de la opinión
     )
 }
 
@@ -88,5 +88,7 @@ private fun Juego.toJSONObject(): JSONObject {
         put("platform", platform)
         put("portada", portada)
         put("estado", estado.name)
+        put("rating", rating)
+        put("opinion", opinion)
     }
 }
