@@ -36,22 +36,34 @@ class JuegoRepositorioImpl @Inject constructor() : JuegoRepositorio {
 
     override suspend fun addJuego(juego: Juego): Result<Unit> {
         val nuevoJuego = juego.copy(id = UUID.randomUUID().toString())
-        // Actualizamos nuestra lista de modelo interna
         _juegos.update { it + nuevoJuego }
-        // Actualizamos la fuente de datos JSON "original"
         Juegos.juegos.add(nuevoJuego.toJSONObject())
         return Result.success(Unit)
     }
 
     override suspend fun updateJuego(juego: Juego): Result<Unit> {
-        // Actualizamos nuestra lista de modelo interna
         _juegos.update { list ->
             list.map { if (it.id == juego.id) juego else it }
         }
-        // Actualizamos la fuente de datos JSON "original"
         val index = Juegos.juegos.indexOfFirst { it.getString("id") == juego.id }
         if (index != -1) {
             Juegos.juegos[index] = juego.toJSONObject()
+        }
+        return Result.success(Unit)
+    }
+
+    /**
+     * Elimina el juego de la lista de modelo y de la fuente de datos JSON.
+     */
+    override suspend fun deleteJuego(juego: Juego): Result<Unit> {
+        // 1. Eliminamos de la lista de modelo interna
+        _juegos.update { list ->
+            list.filter { it.id != juego.id }
+        }
+        // 2. Eliminamos de la fuente de datos JSON "original"
+        val index = Juegos.juegos.indexOfFirst { it.getString("id") == juego.id }
+        if (index != -1) {
+            Juegos.juegos.removeAt(index)
         }
         return Result.success(Unit)
     }
@@ -70,7 +82,6 @@ private fun JSONObject.toJuego(): Juego {
 }
 
 private fun Juego.toJSONObject(): JSONObject {
-    // CORRECCIÓN: Eliminamos 'this' para acceder a las propiedades de Juego
     return JSONObject().apply {
         put("id", id)
         put("title", title)

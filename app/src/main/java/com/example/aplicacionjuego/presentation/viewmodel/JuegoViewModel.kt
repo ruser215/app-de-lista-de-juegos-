@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aplicacionjuego.domain.model.Juego
 import com.example.aplicacionjuego.domain.usecases.AddJuedosUseCase
+import com.example.aplicacionjuego.domain.usecases.DeleteJuegoUseCase
 import com.example.aplicacionjuego.domain.usecases.GetGamesUseCase
 import com.example.aplicacionjuego.domain.usecases.UpdateJuegoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class JuegoViewModel @Inject constructor(
     private val getAllGamesUseCase: GetGamesUseCase,
     private val updateGameUseCase: UpdateJuegoUseCase,
-    private val addGameUseCase: AddJuedosUseCase
+    private val addGameUseCase: AddJuedosUseCase,
+    private val deleteJuegoUseCase: DeleteJuegoUseCase // Inyectamos el nuevo caso de uso
 ) : ViewModel() {
 
     private val _juegos = MutableStateFlow<List<Juego>>(emptyList())
@@ -27,9 +29,12 @@ class JuegoViewModel @Inject constructor(
     private val _addResult = MutableStateFlow<Result<Unit>?>(null)
     val addResult: StateFlow<Result<Unit>?> get() = _addResult
 
-    // StateFlow para el resultado de la actualización
     private val _updateResult = MutableStateFlow<Result<Unit>?>(null)
     val updateResult: StateFlow<Result<Unit>?> get() = _updateResult
+
+    // StateFlow para el resultado del borrado
+    private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
+    val deleteResult: StateFlow<Result<Unit>?> get() = _deleteResult
 
     init {
         loadJuegos()
@@ -54,9 +59,6 @@ class JuegoViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Llama al caso de uso para actualizar el juego en el repositorio.
-     */
     fun updateJuego(juego: Juego) {
         viewModelScope.launch {
             val result = updateGameUseCase(juego)
@@ -64,15 +66,28 @@ class JuegoViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Llama al caso de uso para eliminar el juego.
+     */
+    fun deleteJuego(juego: Juego) {
+        viewModelScope.launch {
+            val result = deleteJuegoUseCase(juego)
+            _deleteResult.value = result
+        }
+    }
+
     fun resetAddResult() {
         _addResult.value = null
     }
 
-    /**
-     * Resetea el estado del resultado de la actualización para evitar que el Toast
-     * se muestre de nuevo (por ejemplo, al girar la pantalla).
-     */
     fun resetUpdateResult() {
         _updateResult.value = null
+    }
+
+    /**
+     * Resetea el estado del resultado del borrado.
+     */
+    fun resetDeleteResult() {
+        _deleteResult.value = null
     }
 }

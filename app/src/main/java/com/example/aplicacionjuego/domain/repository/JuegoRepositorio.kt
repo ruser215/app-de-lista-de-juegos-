@@ -9,7 +9,8 @@ interface JuegoRepositorio {
     suspend fun registerUser(email: String, pass: String): Result<Boolean>
 
     // Funcionalidad de Juegos
-    suspend fun addJuego(Juego: Juego): Result<Unit>
     fun getAllJuegos(): Flow<List<Juego>>
+    suspend fun addJuego(Juego: Juego): Result<Unit>
     suspend fun updateJuego(juego: Juego): Result<Unit>
+    suspend fun deleteJuego(juego: Juego): Result<Unit> // Añadimos la nueva función
 }

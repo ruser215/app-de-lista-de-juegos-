@@ -12,14 +12,11 @@ import org.json.JSONObject
 import java.util.UUID
 import javax.inject.Inject
 
-// Esta implementación actúa como traductor entre la fuente de datos JSON y el modelo de la app
 class JuegoRepositorioLocalImpl @Inject constructor() : JuegoRepositorio {
 
-    // StateFlow interno que contendrá la lista de objetos JUEGO (no JSON)
     private val _juegos = MutableStateFlow<List<Juego>>(emptyList())
 
     init {
-        // Al iniciar, leemos la lista de JSON, la transformamos y la cargamos
         _juegos.value = Juegos.juegos.map { it.toJuego() }
     }
 
@@ -28,41 +25,44 @@ class JuegoRepositorioLocalImpl @Inject constructor() : JuegoRepositorio {
     override suspend fun registerUser(email: String, pass: String): Result<Boolean> = Result.success(true)
 
     override fun getAllJuegos(): Flow<List<Juego>> {
-        // La UI observará este Flow, que ya contiene la lista de objetos Juego
         return _juegos.asStateFlow()
     }
 
     override suspend fun addJuego(juego: Juego): Result<Unit> {
         val nuevoJuego = juego.copy(id = UUID.randomUUID().toString())
-        
-        // 1. Actualizamos la lista de modelo interna para que la UI reaccione
         _juegos.update { it + nuevoJuego }
-        
-        // 2. Actualizamos la fuente de datos JSON "original"
         Juegos.juegos.add(nuevoJuego.toJSONObject())
-        
         return Result.success(Unit)
     }
 
     override suspend fun updateJuego(juego: Juego): Result<Unit> {
-        // 1. Actualizamos la lista de modelo interna
         _juegos.update { list ->
             list.map { if (it.id == juego.id) juego else it }
         }
-        
-        // 2. Actualizamos la fuente de datos JSON "original"
         val index = Juegos.juegos.indexOfFirst { it.getString("id") == juego.id }
         if (index != -1) {
             Juegos.juegos[index] = juego.toJSONObject()
         }
         return Result.success(Unit)
     }
+
+    /**
+     * Elimina el juego de la lista de modelo y de la fuente de datos JSON.
+     */
+    override suspend fun deleteJuego(juego: Juego): Result<Unit> {
+        // 1. Eliminamos de la lista de modelo interna
+        _juegos.update { list ->
+            list.filter { it.id != juego.id }
+        }
+        // 2. Eliminamos de la fuente de datos JSON "original"
+        val index = Juegos.juegos.indexOfFirst { it.getString("id") == juego.id }
+        if (index != -1) {
+            Juegos.juegos.removeAt(index)
+        }
+        return Result.success(Unit)
+    }
 }
 
-/**
- * Función de extensión para convertir un JSONObject en un objeto de nuestro modelo Juego.
- * Es privada para que solo el repositorio pueda usarla.
- */
 private fun JSONObject.toJuego(): Juego {
     return Juego(
         id = this.optString("id"),
