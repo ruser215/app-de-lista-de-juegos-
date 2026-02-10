@@ -4,29 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.ui.JuegoListActivity">
+    tools:context=".presentation.ui.MediaListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvJuegos"
+        android:id="@+id/rvItems"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddGame"
+        android:id="@+id/fabAddItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Añadir juego"
+        android:contentDescription="Añadir item"
         android:src="@android:drawable/ic_input_add" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
-        android:name="com.example.aplicacionjuego.presentation.ui.EditJuegoFragment"
+        android:name="com.example.aplicacionjuego.presentation.ui.EditItemFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        tools:layout="@layout/fragment_edit_juego"/>
+        tools:layout="@layout/fragment_edit_item" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

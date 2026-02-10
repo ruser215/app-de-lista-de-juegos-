@@ -23,13 +23,13 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilUrlPortada"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/ivPortadaEdit"
-            app:layout_constraintTop_toTopOf="@id/ivPortadaEdit"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            app:layout_constraintTop_toTopOf="@id/ivPortadaEdit">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etUrlPortada"
@@ -57,15 +57,34 @@
             app:layout_constraintStart_toStartOf="@id/rbRating"
             app:layout_constraintTop_toBottomOf="@id/rbRating" />
 
+        <!-- Spinner de Categoría añadido -->
+        <Spinner
+            android:id="@+id/spinnerCategoriaEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/spinnerEstadoEdit"
+            app:layout_constraintTop_toBottomOf="@id/spinnerEstadoEdit" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilOpinion"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivPortadaEdit"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            app:layout_constraintTop_toBottomOf="@id/ivPortadaEdit">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etOpinion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="Mi opinión..."
+                android:inputType="textMultiLine"
+                android:minLines="4" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,24 +92,11 @@
             android:id="@+id/btnGuardar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
+            android:layout_marginTop="16dp"
             android:text="Guardar Cambios"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etOpinion" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etOpinion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:gravity="top"
-            android:hint="Mi opinión sobre el juego..."
-            android:inputType="textMultiLine"
-            android:minLines="4"
-            app:layout_constraintTop_toBottomOf="@+id/tilOpinion"
-            tools:layout_editor_absoluteX="16dp" />
+            app:layout_constraintTop_toBottomOf="@id/tilOpinion" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

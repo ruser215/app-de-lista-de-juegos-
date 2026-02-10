@@ -1,10 +1,10 @@
 package com.example.aplicacionjuego.domain.usecases
 
-import com.example.aplicacionjuego.domain.repository.JuegoRepositorio
+import com.example.aplicacionjuego.domain.repository.MediaRepository
 import javax.inject.Inject
 
 class RegisterUseCase @Inject constructor(
-    private val repository: JuegoRepositorio
+    private val repository: MediaRepository
 ) {
     suspend operator fun invoke(email: String, pass: String): Result<Boolean> {
         // Aquí podrías validar que la contraseña tenga más de 6 caracteres antes de ir a Firebase

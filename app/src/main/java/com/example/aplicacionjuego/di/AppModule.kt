@@ -1,10 +1,9 @@
 package com.example.aplicacionjuego.di
 
-import com.example.aplicacionjuego.data.repository.JuegoRepositorioImpl
-import com.example.aplicacionjuego.data.repository.JuegoRepositorioLocalImpl
-import com.example.aplicacionjuego.domain.repository.JuegoRepositorio
+import com.example.aplicacionjuego.data.repository.MediaRepositoryLocalImpl
+import com.example.aplicacionjuego.domain.repository.MediaRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,16 +14,24 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    // Proveedor de FirebaseAuth, necesario para la autenticación
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
-    // Proveedor del Repositorio. Ahora inyecta FirebaseAuth en la implementación local.
+    // Este provider solo se encarga de construir la implementación concreta
     @Provides
     @Singleton
-    fun provideGameRepository(auth: FirebaseAuth): JuegoRepositorio {
-        // La app usará la implementación local, que ahora contiene la lógica de Firebase Auth.
-        return JuegoRepositorioLocalImpl(auth)
+    fun provideMediaRepositoryLocalImpl(auth: FirebaseAuth): MediaRepositoryLocalImpl {
+        return MediaRepositoryLocalImpl(auth)
     }
+}
+
+// Este módulo abstracto le dice a Hilt qué implementación usar para la interfaz
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindMediaRepository(impl: MediaRepositoryLocalImpl): MediaRepository
 }

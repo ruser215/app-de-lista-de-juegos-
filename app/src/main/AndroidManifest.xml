@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".MiJuegoApp"
+        android:name=".MiItemApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".presentation.ui.JuegoListActivity"
+            android:name=".presentation.ui.MediaListActivity"
             android:exported="false" />
         <activity
             android:name=".presentation.ui.RegisterActivity"
