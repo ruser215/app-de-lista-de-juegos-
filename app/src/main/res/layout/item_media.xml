@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,7 +22,6 @@
             app:layout_constraintDimensionRatio="2:3"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
@@ -33,12 +32,10 @@
             android:layout_marginTop="12dp"
             android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            android:maxLines="2"
-            android:ellipsize="end"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/ivPortada"
             app:layout_constraintEnd_toStartOf="@id/btnDelete"
-            tools:text="Nombre Muy Largo de un Item para ver como se corta" />
+            tools:text="Nombre del Item" />
 
         <TextView
             android:id="@+id/tvPlataforma"
@@ -52,16 +49,25 @@
             app:layout_constraintEnd_toEndOf="@id/tvTitulo"
             tools:text="Plataforma / Canal" />
 
-        <!-- El Chip de Estado ahora se posiciona correctamente -->
         <com.google.android.material.chip.Chip
-            android:id="@+id/chipEstado"
-            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:id="@+id/chipCategoria"
             android:layout_width="wrap_content"
-            android:layout_height="38dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/white"
+            app:chipBackgroundColor="@color/md_yellow_500"
+            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@id/tvPlataforma"
             app:layout_constraintTop_toBottomOf="@id/tvPlataforma"
+            tools:text="CATEGORÍA" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipEstado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toEndOf="@id/chipCategoria"
+            app:layout_constraintTop_toTopOf="@id/chipCategoria"
             tools:text="ESTADO" />
 
         <ImageButton
@@ -70,12 +76,9 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="?android:attr/textColorSecondary"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
+            app:tint="@android:color/darker_gray"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="Eliminar item"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

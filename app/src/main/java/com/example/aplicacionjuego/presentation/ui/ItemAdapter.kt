@@ -8,17 +8,15 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.aplicacionjuego.R
-import com.example.aplicacionjuego.databinding.ItemItemBinding // 1. Usamos el ViewBinding correcto
+import com.example.aplicacionjuego.databinding.ItemItemBinding
 import com.example.aplicacionjuego.domain.model.Estado
-import com.example.aplicacionjuego.domain.model.MediaItem // 2. Usamos el modelo correcto
+import com.example.aplicacionjuego.domain.model.MediaItem
 
-// 3. Renombramos la clase
 class MediaAdapter(
     private val onItemClick: (MediaItem) -> Unit,
     private val onDeleteClick: (MediaItem) -> Unit
 ) : ListAdapter<MediaItem, MediaAdapter.MediaViewHolder>(MediaDiffCallback()) {
 
-    // 4. Renombramos el ViewHolder y actualizamos su binding
     class MediaViewHolder(val binding: ItemItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
@@ -27,11 +25,12 @@ class MediaAdapter(
     }
 
     override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
-        val item = getItem(position) // Ahora es un MediaItem
+        val item = getItem(position)
         with(holder.binding) {
             tvTitulo.text = item.title
             tvPlataforma.text = item.platform
-            tvEstado.text = item.estado.name
+
+            chipEstado.text = item.estado.name
 
             Glide.with(ivPortada.context)
                 .load(item.portada)
@@ -39,13 +38,14 @@ class MediaAdapter(
                 .error(R.drawable.ic_error)
                 .into(ivPortada)
 
-            val color = when (item.estado) {
-                Estado.PENDIENTE -> android.R.color.holo_orange_light
-                Estado.COMENZADO -> android.R.color.holo_green_dark
-                Estado.PAUSADO -> android.R.color.holo_red_dark
-                Estado.TERMINADO -> android.R.color.holo_blue_dark
+            val estadoColor = when (item.estado) {
+                Estado.PENDIENTE -> R.color.status_pendiente
+                Estado.COMENZADO -> R.color.status_comenzado
+                Estado.PAUSADO -> R.color.status_pausado
+                Estado.TERMINADO -> R.color.status_terminado
+                else -> R.color.status_pendiente
             }
-            tvEstado.backgroundTintList = ContextCompat.getColorStateList(tvEstado.context, color)
+            chipEstado.setChipBackgroundColorResource(estadoColor)
 
             root.setOnClickListener { onItemClick(item) }
             btnDelete.setOnClickListener { onDeleteClick(item) }
@@ -53,7 +53,6 @@ class MediaAdapter(
     }
 }
 
-// 5. Actualizamos el DiffCallback para que use MediaItem
 class MediaDiffCallback : DiffUtil.ItemCallback<MediaItem>() {
     override fun areItemsTheSame(oldItem: MediaItem, newItem: MediaItem): Boolean {
         return oldItem.id == newItem.id

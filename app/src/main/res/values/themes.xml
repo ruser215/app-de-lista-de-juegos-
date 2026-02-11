@@ -1,8 +1,21 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Aplicacionjuego" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.Aplicacionjuego" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Color Principal (Azul) -->
+        <item name="colorPrimary">@color/md_blue_500</item>
+        <item name="colorPrimaryVariant">@color/md_blue_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Color Secundario (Rosa) -->
+        <item name="colorSecondary">@color/md_pink_500</item>
+        <item name="colorSecondaryVariant">@color/md_pink_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Color de Acento (Amarillo) -->
+        <item name="colorAccent">@color/md_yellow_500</item>
+
+        <!-- Color de la Barra de Estado -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
     </style>
 
     <style name="Theme.Aplicacionjuego" parent="Base.Theme.Aplicacionjuego" />
