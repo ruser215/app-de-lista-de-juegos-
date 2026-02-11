@@ -3,7 +3,6 @@ package com.example.aplicacionjuego.presentation.ui
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -18,9 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplicacionjuego.R
 import com.example.aplicacionjuego.databinding.ActivityMediaListBinding
-import com.example.aplicacionjuego.databinding.DialogAddItemBinding
 import com.example.aplicacionjuego.domain.model.Categoria
-import com.example.aplicacionjuego.domain.model.Estado
 import com.example.aplicacionjuego.domain.model.MediaItem
 import com.example.aplicacionjuego.presentation.viewmodel.MediaViewModel
 import com.google.android.material.navigation.NavigationView
@@ -45,16 +42,15 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         setupObservers()
         setupBackButton()
 
+        // 1. El FAB ahora llama a la función para mostrar el FRAGMENT de añadir
         binding.fabAddItem.setOnClickListener {
-            showAddItemDialog()
+            showAddItemFragment()
         }
     }
 
     private fun setupDrawer() {
         setSupportActionBar(binding.toolbar)
-        toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.toolbar, R.string.app_name, R.string.app_name
-        )
+        toggle = ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.app_name, R.string.app_name)
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         binding.navView.setNavigationItemSelectedListener(this)
@@ -69,8 +65,12 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 launch {
                     viewModel.addResult.collect { result ->
                         result?.let {
-                            if (it.isSuccess) Toast.makeText(this@MediaListActivity, "Item añadido", Toast.LENGTH_SHORT).show()
-                            else Toast.makeText(this@MediaListActivity, "Error: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                            if (it.isSuccess) {
+                                Toast.makeText(this@MediaListActivity, "Item añadido", Toast.LENGTH_SHORT).show()
+                                hideAddItemFragment() // 2. Ocultamos el fragmento al añadir con éxito
+                            } else {
+                                Toast.makeText(this@MediaListActivity, "Error: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                            }
                             viewModel.resetAddResult()
                         }
                     }
@@ -80,7 +80,7 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                         result?.let {
                             if (it.isSuccess) {
                                 Toast.makeText(this@MediaListActivity, "Item actualizado", Toast.LENGTH_SHORT).show()
-                                hideEditFragment() // <-- La línea que faltaba
+                                hideEditFragment()
                             } else {
                                 Toast.makeText(this@MediaListActivity, "Error: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
                             }
@@ -122,38 +122,8 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
-
-    private fun showAddItemDialog() {
-        val dialogBinding = DialogAddItemBinding.inflate(layoutInflater)
-        
-        val estados = Estado.values().map { it.name }
-        val estadoAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, estados)
-        dialogBinding.spinnerEstado.adapter = estadoAdapter
-
-        val categorias = Categoria.values().map { it.name }
-        val categoriaAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias)
-        dialogBinding.spinnerCategoria.adapter = categoriaAdapter
-
-        AlertDialog.Builder(this)
-            .setTitle("Añadir a mi colección")
-            .setView(dialogBinding.root)
-            .setPositiveButton("Añadir") { _, _ ->
-                val title = dialogBinding.etTitle.text.toString()
-                val platform = dialogBinding.etPlatform.text.toString()
-                val portada = dialogBinding.etPortada.text.toString()
-                val estado = Estado.valueOf(dialogBinding.spinnerEstado.selectedItem.toString())
-                val categoria = Categoria.valueOf(dialogBinding.spinnerCategoria.selectedItem.toString())
-
-                if (title.isNotEmpty()) {
-                    val newItem = MediaItem(title = title, platform = platform, portada = portada, estado = estado, categoria = categoria)
-                    viewModel.addItem(newItem)
-                } else {
-                    Toast.makeText(this, "El título es obligatorio", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
+    
+    // 3. Eliminamos showAddItemDialog() y lo reemplazamos por la lógica de fragmentos
 
     private fun showDeleteConfirmDialog(item: MediaItem) {
         AlertDialog.Builder(this)
@@ -166,25 +136,38 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
     private fun showEditFragment(item: MediaItem) {
         viewModel.selectItem(item)
-        binding.fragmentContainerView.visibility = View.VISIBLE
+        binding.editFragmentContainer.visibility = View.VISIBLE // ID correcto
         binding.rvItems.visibility = View.GONE
         binding.fabAddItem.visibility = View.GONE
     }
 
     private fun hideEditFragment() {
-        binding.fragmentContainerView.visibility = View.GONE
+        binding.editFragmentContainer.visibility = View.GONE // ID correcto
         binding.rvItems.visibility = View.VISIBLE
         binding.fabAddItem.visibility = View.VISIBLE
         viewModel.selectItem(null)
     }
 
+    private fun showAddItemFragment() {
+        binding.addFragmentContainer.visibility = View.VISIBLE // ID correcto
+        binding.rvItems.visibility = View.GONE
+        binding.fabAddItem.visibility = View.GONE
+    }
+
+    private fun hideAddItemFragment() {
+        binding.addFragmentContainer.visibility = View.GONE // ID correcto
+        binding.rvItems.visibility = View.VISIBLE
+        binding.fabAddItem.visibility = View.VISIBLE
+    }
+
     private fun setupBackButton() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (binding.fragmentContainerView.isVisible) {
-                    hideEditFragment()
-                } else {
-                    finish()
+                // 4. El botón atrás ahora gestiona ambos fragmentos
+                when {
+                    binding.editFragmentContainer.isVisible -> hideEditFragment()
+                    binding.addFragmentContainer.isVisible -> hideAddItemFragment()
+                    else -> finish()
                 }
             }
         })
