@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.aplicacionjuego.R
-import com.example.aplicacionjuego.databinding.FragmentEditItemBinding // 1. Usamos el ViewBinding correcto
+import com.example.aplicacionjuego.databinding.FragmentEditItemBinding
 import com.example.aplicacionjuego.domain.model.Categoria
 import com.example.aplicacionjuego.domain.model.Estado
 import com.example.aplicacionjuego.domain.model.MediaItem
@@ -22,14 +22,12 @@ import kotlinx.coroutines.launch
 
 class EditItemFragment : Fragment() {
 
-    // 2. Actualizamos el tipo de _binding
     private var _binding: FragmentEditItemBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: MediaViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        // 3. Inflamos con el binding correcto
         _binding = FragmentEditItemBinding.inflate(inflater, container, false)
         return binding.root
     }

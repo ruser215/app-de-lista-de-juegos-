@@ -28,10 +28,8 @@ class MediaViewModel @Inject constructor(
 
     private val _allItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
-    // Flow para el filtro de categoría
     private val _categoryFilter = MutableStateFlow<Categoria?>(null)
 
-    // Flow público que combina la lista completa y el filtro
     val mediaItems: StateFlow<List<MediaItem>> = 
         combine(_allItems, _categoryFilter) { items, filter ->
             if (filter == null) {
@@ -60,15 +58,11 @@ class MediaViewModel @Inject constructor(
     private fun loadItems() {
         viewModelScope.launch {
             getAllItemsUseCase()
-                .catch { e -> /* Manejo de errores */ }
-                .collect { _allItems.value = it } // Actualizamos la lista completa
+                .catch { e -> }
+                .collect { _allItems.value = it }
         }
     }
 
-    /**
-     * Actualiza el filtro de categoría.
-     * Si el filtro es nulo, se mostrarán todos los items.
-     */
     fun setCategoryFilter(categoria: Categoria?) {
         _categoryFilter.value = categoria
     }

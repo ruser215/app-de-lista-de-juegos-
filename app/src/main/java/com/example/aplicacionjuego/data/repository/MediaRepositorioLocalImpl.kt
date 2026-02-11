@@ -3,8 +3,8 @@ package com.example.aplicacionjuego.data.repository
 import com.example.aplicacionjuego.data.datasource.ItemsMedia
 import com.example.aplicacionjuego.domain.model.Categoria
 import com.example.aplicacionjuego.domain.model.Estado
-import com.example.aplicacionjuego.domain.model.MediaItem // Importamos el modelo correcto
-import com.example.aplicacionjuego.domain.repository.MediaRepository // Importamos la interfaz correcta
+import com.example.aplicacionjuego.domain.model.MediaItem
+import com.example.aplicacionjuego.domain.repository.MediaRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,20 +15,16 @@ import org.json.JSONObject
 import java.util.UUID
 import javax.inject.Inject
 
-// 1. Renombramos la clase y la hacemos implementar la nueva interfaz
 class MediaRepositoryLocalImpl @Inject constructor(
     private val auth: FirebaseAuth
 ) : MediaRepository {
 
-    // 2. Cambiamos el tipo del StateFlow a MediaItem
     private val _mediaItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
     init {
-        // Al iniciar, leemos la lista de JSON y la transformamos a MediaItem
         _mediaItems.value = ItemsMedia.juegos.map { it.toMediaItem() }
     }
 
-    // --- AUTENTICACIÓN (sin cambios) ---
     override suspend fun loginUser(email: String, pass: String): Result<Boolean> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, pass).await()
@@ -50,8 +46,6 @@ class MediaRepositoryLocalImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
-    // --- GESTIÓN DE ITEMS (actualizamos los métodos) ---
 
     override fun getAllItems(): Flow<List<MediaItem>> {
         return _mediaItems.asStateFlow()
@@ -83,7 +77,6 @@ class MediaRepositoryLocalImpl @Inject constructor(
     }
 }
 
-// 3. Actualizamos la función de mapeo
 private fun JSONObject.toMediaItem(): MediaItem {
     return MediaItem(
         id = this.optString("id"),

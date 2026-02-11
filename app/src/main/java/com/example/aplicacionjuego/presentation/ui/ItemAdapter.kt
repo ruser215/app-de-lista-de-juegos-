@@ -2,7 +2,6 @@ package com.example.aplicacionjuego.presentation.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +28,6 @@ class MediaAdapter(
         with(holder.binding) {
             tvTitulo.text = item.title
             tvPlataforma.text = item.platform
-
             chipEstado.text = item.estado.name
 
             Glide.with(ivPortada.context)

@@ -42,7 +42,6 @@ class LoginActivity : AppCompatActivity() {
             viewModel.loginState.collect { result ->
                 result?.let {
                     it.onSuccess {
-                        // 1. Navegamos a la Activity correcta
                         startActivity(Intent(this@LoginActivity, MediaListActivity::class.java))
                         finish()
                     }.onFailure {

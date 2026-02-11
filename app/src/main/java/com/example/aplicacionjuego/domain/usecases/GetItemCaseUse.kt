@@ -5,11 +5,11 @@ import com.example.aplicacionjuego.domain.repository.MediaRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-// Renombramos el caso de uso
+
 class GetAllItemsUseCase @Inject constructor(
     private val repository: MediaRepository
 ) {
     operator fun invoke(): Flow<List<MediaItem>> {
-        return repository.getAllItems() // Llamamos al nuevo método
+        return repository.getAllItems()
     }
 }

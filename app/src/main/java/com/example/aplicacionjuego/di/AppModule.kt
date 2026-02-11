@@ -18,7 +18,7 @@ object AppModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
-    // Este provider solo se encarga de construir la implementación concreta
+
     @Provides
     @Singleton
     fun provideMediaRepositoryLocalImpl(auth: FirebaseAuth): MediaRepositoryLocalImpl {
@@ -26,7 +26,6 @@ object AppModule {
     }
 }
 
-// Este módulo abstracto le dice a Hilt qué implementación usar para la interfaz
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {

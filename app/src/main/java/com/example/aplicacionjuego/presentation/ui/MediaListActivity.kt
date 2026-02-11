@@ -42,7 +42,6 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         setupObservers()
         setupBackButton()
 
-        // 1. El FAB ahora llama a la función para mostrar el FRAGMENT de añadir
         binding.fabAddItem.setOnClickListener {
             showAddItemFragment()
         }
@@ -67,7 +66,7 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                         result?.let {
                             if (it.isSuccess) {
                                 Toast.makeText(this@MediaListActivity, "Item añadido", Toast.LENGTH_SHORT).show()
-                                hideAddItemFragment() // 2. Ocultamos el fragmento al añadir con éxito
+                                hideAddItemFragment()
                             } else {
                                 Toast.makeText(this@MediaListActivity, "Error: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
                             }
@@ -122,8 +121,6 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
-    
-    // 3. Eliminamos showAddItemDialog() y lo reemplazamos por la lógica de fragmentos
 
     private fun showDeleteConfirmDialog(item: MediaItem) {
         AlertDialog.Builder(this)
@@ -136,26 +133,26 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
     private fun showEditFragment(item: MediaItem) {
         viewModel.selectItem(item)
-        binding.editFragmentContainer.visibility = View.VISIBLE // ID correcto
+        binding.editFragmentContainer.visibility = View.VISIBLE
         binding.rvItems.visibility = View.GONE
         binding.fabAddItem.visibility = View.GONE
     }
 
     private fun hideEditFragment() {
-        binding.editFragmentContainer.visibility = View.GONE // ID correcto
+        binding.editFragmentContainer.visibility = View.GONE
         binding.rvItems.visibility = View.VISIBLE
         binding.fabAddItem.visibility = View.VISIBLE
         viewModel.selectItem(null)
     }
 
     private fun showAddItemFragment() {
-        binding.addFragmentContainer.visibility = View.VISIBLE // ID correcto
+        binding.addFragmentContainer.visibility = View.VISIBLE
         binding.rvItems.visibility = View.GONE
         binding.fabAddItem.visibility = View.GONE
     }
 
     private fun hideAddItemFragment() {
-        binding.addFragmentContainer.visibility = View.GONE // ID correcto
+        binding.addFragmentContainer.visibility = View.GONE
         binding.rvItems.visibility = View.VISIBLE
         binding.fabAddItem.visibility = View.VISIBLE
     }
@@ -163,7 +160,6 @@ class MediaListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun setupBackButton() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // 4. El botón atrás ahora gestiona ambos fragmentos
                 when {
                     binding.editFragmentContainer.isVisible -> hideEditFragment()
                     binding.addFragmentContainer.isVisible -> hideAddItemFragment()

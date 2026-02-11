@@ -76,9 +76,7 @@ class AddItemFragment : Fragment() {
             }
         }
 
-        // Añadimos el listener para el nuevo botón
         binding.btnCancelar.setOnClickListener {
-            // Simulamos el evento de pulsar "atrás" para que la Activity se encargue de ocultar el fragmento
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
