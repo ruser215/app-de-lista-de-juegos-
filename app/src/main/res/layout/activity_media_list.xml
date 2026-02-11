@@ -9,6 +9,7 @@
     android:fitsSystemWindows="true"
     tools:context=".presentation.ui.MediaListActivity">
 
+    <!-- Contenido Principal de la Pantalla -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -41,7 +42,6 @@
             android:contentDescription="Añadir item"
             android:src="@android:drawable/ic_input_add" />
 
-        <!-- Contenedor para el Fragmento de EDICIÓN -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/edit_fragment_container"
             android:name="com.example.aplicacionjuego.presentation.ui.EditItemFragment"
@@ -50,7 +50,6 @@
             android:visibility="gone"
             tools:layout="@layout/fragment_edit_item" />
 
-        <!-- Contenedor para el Fragmento de AÑADIR -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/add_fragment_container"
             android:name="com.example.aplicacionjuego.presentation.ui.AddItemFragment"
@@ -61,11 +60,13 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
+    <!-- Menú Desplegable (Navigation Drawer) -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_view" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
