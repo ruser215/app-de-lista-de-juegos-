@@ -18,6 +18,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel para la pantalla principal. Es el "cerebro" de la UI.
+ * Se encarga de:
+ * - Pedir los datos a la capa de Dominio (a través de los Casos de Uso).
+ * - Gestionar el estado de la UI (la lista de ítems, filtros, resultados de operaciones...).
+ * - Exponer este estado a la Vista (Activity/Fragments) para que se pinten los datos.
+ */
 @HiltViewModel
 class MediaViewModel @Inject constructor(
     private val getAllItemsUseCase: GetAllItemsUseCase,
@@ -26,10 +33,20 @@ class MediaViewModel @Inject constructor(
     private val deleteItemUseCase: DeleteItemUseCase
 ) : ViewModel() {
 
+    // --- GESTIÓN DEL ESTADO DE LA LISTA Y FILTRADO ---
+
+    // `_allItems` es la "fuente de la verdad". Contiene la lista COMPLETA y sin filtrar de ítems.
     private val _allItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
+    // `_categoryFilter` guarda la categoría seleccionada por el usuario. `null` significa "mostrar todos".
     private val _categoryFilter = MutableStateFlow<Categoria?>(null)
 
+    /**
+     * `mediaItems` es el `StateFlow` PÚBLICO que la UI observará.
+     * Se crea usando `combine`, que mezcla los datos de `_allItems` y `_categoryFilter`.
+     * Cada vez que cualquiera de los dos flujos de origen emite un nuevo valor, `combine` se ejecuta
+     * y emite una nueva lista filtrada. Esto crea una UI completamente reactiva.
+     */
     val mediaItems: StateFlow<List<MediaItem>> = 
         combine(_allItems, _categoryFilter) { items, filter ->
             if (filter == null) {
@@ -39,6 +56,11 @@ class MediaViewModel @Inject constructor(
             }
         }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Lazily, emptyList())
 
+
+    // --- GESTIÓN DEL ESTADO DE OPERACIONES (ADD, UPDATE, DELETE) ---
+
+    // StateFlows para notificar a la UI sobre el resultado de las operaciones.
+    // Son `nullable` para poder "resetearlos" y evitar que un Toast se muestre múltiples veces.
     private val _addResult = MutableStateFlow<Result<Unit>?>(null)
     val addResult: StateFlow<Result<Unit>?> get() = _addResult
 
@@ -48,20 +70,25 @@ class MediaViewModel @Inject constructor(
     private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
     val deleteResult: StateFlow<Result<Unit>?> get() = _deleteResult
 
+    // --- GESTIÓN DEL ESTADO DEL ÍTEM SELECCIONADO (para la edición) ---
+
     private val _selectedItem = MutableStateFlow<MediaItem?>(null)
     val selectedItem: StateFlow<MediaItem?> get() = _selectedItem
 
     init {
-        loadItems()
+        loadItems() // Se cargan los datos iniciales al crear el ViewModel.
     }
 
+    /** Carga la lista completa de ítems desde el repositorio. */
     private fun loadItems() {
         viewModelScope.launch {
             getAllItemsUseCase()
-                .catch { e -> }
+                .catch { e -> /* Aquí se podría gestionar un error de carga */ }
                 .collect { _allItems.value = it }
         }
     }
+
+    // --- FUNCIONES PÚBLICAS (Llamadas por la UI) ---
 
     fun setCategoryFilter(categoria: Categoria?) {
         _categoryFilter.value = categoria
@@ -88,6 +115,8 @@ class MediaViewModel @Inject constructor(
             _deleteResult.value = deleteItemUseCase(item)
         }
     }
+
+    // --- FUNCIONES PARA RESETEAR EL ESTADO DE LAS OPERACIONES ---
 
     fun resetAddResult() { _addResult.value = null }
     fun resetUpdateResult() { _updateResult.value = null }

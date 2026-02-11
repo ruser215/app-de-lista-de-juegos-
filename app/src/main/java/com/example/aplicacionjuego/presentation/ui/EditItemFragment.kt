@@ -20,11 +20,17 @@ import com.example.aplicacionjuego.domain.model.MediaItem
 import com.example.aplicacionjuego.presentation.viewmodel.MediaViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Fragmento encargado de la interfaz para editar un ítem existente.
+ * Es muy similar al de añadir, pero con una diferencia clave: este fragmento
+ * OBSERVA los datos de un ítem seleccionado en el ViewModel para rellenar su UI.
+ */
 class EditItemFragment : Fragment() {
 
     private var _binding: FragmentEditItemBinding? = null
     private val binding get() = _binding!!
 
+    // Obtenemos el ViewModel compartido con la Activity.
     private val viewModel: MediaViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -38,24 +44,31 @@ class EditItemFragment : Fragment() {
         setupListeners()
     }
 
+    /**
+     * Configura los observadores del ViewModel. En este caso, solo nos interesa el `selectedItem`.
+     */
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Nos suscribimos a los cambios del `selectedItem` en el ViewModel.
                 viewModel.selectedItem.collect { item ->
+                    // Si el ítem no es nulo, llamamos a la función que rellena la UI con sus datos.
                     item?.let { bindMediaItemData(it) }
                 }
             }
         }
     }
 
+    /** Configura los listeners de la UI. */
     private fun setupListeners() {
         binding.etUrlPortada.addTextChangedListener {
-            Glide.with(this).load(it.toString()).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_error).into(binding.ivPortadaEdit)
+            Glide.with(requireContext()).load(it.toString()).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_error).into(binding.ivPortadaEdit)
         }
 
         binding.btnGuardar.setOnClickListener {
             val currentItem = viewModel.selectedItem.value ?: return@setOnClickListener
             
+            // Creamos una copia del ítem actual con los nuevos datos de la UI.
             val updatedItem = currentItem.copy(
                 portada = binding.etUrlPortada.text.toString(),
                 rating = binding.rbRating.rating,
@@ -64,10 +77,14 @@ class EditItemFragment : Fragment() {
                 categoria = Categoria.valueOf(binding.spinnerCategoriaEdit.selectedItem.toString())
             )
             
+            // Delegamos la acción de actualizar al ViewModel.
             viewModel.updateItem(updatedItem)
         }
     }
 
+    /**
+     * Rellena todos los campos de la UI con los datos del `MediaItem` proporcionado.
+     */
     private fun bindMediaItemData(item: MediaItem) {
         binding.apply {
             etUrlPortada.setText(item.portada)
@@ -76,6 +93,7 @@ class EditItemFragment : Fragment() {
 
             Glide.with(requireContext()).load(item.portada).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_error).into(ivPortadaEdit)
             
+            // Configuración de los Spinners para que muestren el valor actual del ítem.
             val estados = Estado.values().map { it.name }
             val estadoAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, estados).apply {
                 setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -94,6 +112,6 @@ class EditItemFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _binding = null // Es importante limpiar el binding para evitar fugas de memoria.
     }
 }

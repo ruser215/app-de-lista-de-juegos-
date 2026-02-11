@@ -15,46 +15,69 @@ import org.json.JSONObject
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Esta es la implementación concreta de nuestra interfaz `MediaRepository`.
+ * Es la clase que realmente "hace el trabajo" que el contrato (la interfaz) promete.
+ * En nuestro caso, tiene una doble responsabilidad:
+ *  1. Gestionar la autenticación de usuarios usando Firebase.
+ *  2. Gestionar una lista de ítems (juegos, películas...) de forma local, en memoria.
+ */
 class MediaRepositoryLocalImpl @Inject constructor(
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth // Inyectamos la dependencia de Firebase Auth.
 ) : MediaRepository {
 
+    /**
+     * `_mediaItems` es la "fuente de la verdad" para los datos de los ítems.
+     * Es un `MutableStateFlow`, lo que significa que es un flujo de datos que emite su estado actual
+     * a cualquier colector y puede ser modificado.
+     * Es `private` para que solo el repositorio pueda modificar la lista original.
+     */
     private val _mediaItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
     init {
+        // Cuando se crea una instancia de este repositorio (al arrancar la app gracias a Hilt),
+        // se cargan los datos iniciales desde la clase `ItemsMedia`.
         _mediaItems.value = ItemsMedia.juegos.map { it.toMediaItem() }
     }
 
+    // --- SECCIÓN DE AUTENTICACIÓN (Delegada a Firebase) ---
+
     override suspend fun loginUser(email: String, pass: String): Result<Boolean> {
         return try {
-            val result = auth.signInWithEmailAndPassword(email, pass).await()
-            if (result.user?.isEmailVerified == true) Result.success(true)
-            else {
-                auth.signOut()
+            val result = auth.signInWithEmailAndPassword(email, pass).await() // Usamos await() para trabajar con corrutinas
+            if (result.user?.isEmailVerified == true) {
+                Result.success(true)
+            } else {
+                auth.signOut() // Si el email no está verificado, cerramos sesión
                 Result.failure(Exception("Debes verificar tu correo electrónico."))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e) // Capturamos cualquier excepción de Firebase (ej: contraseña incorrecta)
         }
     }
 
     override suspend fun registerUser(email: String, pass: String): Result<Boolean> {
         return try {
-            auth.createUserWithEmailAndPassword(email, pass).await().user?.sendEmailVerification()?.await()
+            val result = auth.createUserWithEmailAndPassword(email, pass).await()
+            result.user?.sendEmailVerification()?.await() // Enviamos el email de verificación
             Result.success(true)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e) // Capturamos cualquier excepción (ej: email ya en uso)
         }
     }
 
+    // --- SECCIÓN DE GESTIÓN DE ITEMS (Local) ---
+
     override fun getAllItems(): Flow<List<MediaItem>> {
+        // Exponemos la lista como un `Flow` inmutable para que la capa superior (ViewModel)
+        // no pueda modificarla directamente, solo observarla.
         return _mediaItems.asStateFlow()
     }
 
     override suspend fun addItem(item: MediaItem): Result<Unit> {
         val nuevoItem = item.copy(id = UUID.randomUUID().toString())
-        _mediaItems.update { it + nuevoItem }
-        ItemsMedia.juegos.add(nuevoItem.toJSONObject())
+        _mediaItems.update { it + nuevoItem } // `update` es una forma segura de modificar el StateFlow
+        ItemsMedia.juegos.add(nuevoItem.toJSONObject()) // También actualizamos la fuente de datos "original"
         return Result.success(Unit)
     }
 
@@ -77,6 +100,11 @@ class MediaRepositoryLocalImpl @Inject constructor(
     }
 }
 
+/**
+ * Función de extensión privada para convertir un `JSONObject` en un `MediaItem`.
+ * Esto es parte de la "traducción" entre la capa de datos y la de dominio.
+ * Es `private` porque solo el repositorio necesita saber cómo hacer esta conversión.
+ */
 private fun JSONObject.toMediaItem(): MediaItem {
     return MediaItem(
         id = this.optString("id"),
