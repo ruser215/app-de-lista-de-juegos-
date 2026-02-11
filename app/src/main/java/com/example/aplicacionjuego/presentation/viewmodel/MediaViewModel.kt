@@ -2,6 +2,7 @@ package com.example.aplicacionjuego.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.aplicacionjuego.domain.model.Categoria
 import com.example.aplicacionjuego.domain.model.MediaItem
 import com.example.aplicacionjuego.domain.usecases.AddItemUseCase
 import com.example.aplicacionjuego.domain.usecases.DeleteItemUseCase
@@ -12,22 +13,33 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// 1. Renombramos la clase
 @HiltViewModel
 class MediaViewModel @Inject constructor(
-    // 2. Inyectamos los nuevos casos de uso refactorizados
     private val getAllItemsUseCase: GetAllItemsUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
     private val addItemUseCase: AddItemUseCase,
     private val deleteItemUseCase: DeleteItemUseCase
 ) : ViewModel() {
 
-    // 3. Actualizamos los StateFlows para que usen MediaItem
-    private val _mediaItems = MutableStateFlow<List<MediaItem>>(emptyList())
-    val mediaItems: StateFlow<List<MediaItem>> get() = _mediaItems
+    private val _allItems = MutableStateFlow<List<MediaItem>>(emptyList())
+
+    // Flow para el filtro de categoría
+    private val _categoryFilter = MutableStateFlow<Categoria?>(null)
+
+    // Flow público que combina la lista completa y el filtro
+    val mediaItems: StateFlow<List<MediaItem>> = 
+        combine(_allItems, _categoryFilter) { items, filter ->
+            if (filter == null) {
+                items
+            } else {
+                items.filter { it.categoria == filter }
+            }
+        }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Lazily, emptyList())
 
     private val _addResult = MutableStateFlow<Result<Unit>?>(null)
     val addResult: StateFlow<Result<Unit>?> get() = _addResult
@@ -45,13 +57,20 @@ class MediaViewModel @Inject constructor(
         loadItems()
     }
 
-    // 4. Renombramos los métodos y la lógica interna
     private fun loadItems() {
         viewModelScope.launch {
             getAllItemsUseCase()
                 .catch { e -> /* Manejo de errores */ }
-                .collect { _mediaItems.value = it }
+                .collect { _allItems.value = it } // Actualizamos la lista completa
         }
+    }
+
+    /**
+     * Actualiza el filtro de categoría.
+     * Si el filtro es nulo, se mostrarán todos los items.
+     */
+    fun setCategoryFilter(categoria: Categoria?) {
+        _categoryFilter.value = categoria
     }
 
     fun selectItem(item: MediaItem?) {
@@ -76,7 +95,6 @@ class MediaViewModel @Inject constructor(
         }
     }
 
-    // --- Métodos para resetear los resultados ---
     fun resetAddResult() { _addResult.value = null }
     fun resetUpdateResult() { _updateResult.value = null }
     fun resetDeleteResult() { _deleteResult.value = null }

@@ -41,8 +41,8 @@ class MediaAdapter(
 
             val color = when (item.estado) {
                 Estado.PENDIENTE -> android.R.color.holo_orange_light
-                Estado.EN_PROGRESO -> android.R.color.holo_green_dark
-                Estado.EN_PAUSA -> android.R.color.holo_red_dark
+                Estado.COMENZADO -> android.R.color.holo_green_dark
+                Estado.PAUSADO -> android.R.color.holo_red_dark
                 Estado.TERMINADO -> android.R.color.holo_blue_dark
             }
             tvEstado.backgroundTintList = ContextCompat.getColorStateList(tvEstado.context, color)

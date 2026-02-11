@@ -9,7 +9,7 @@ enum class Categoria {
 
 // Hacemos el enum Estado más genérico
 enum class Estado {
-    PENDIENTE, EN_PROGRESO, TERMINADO, EN_PAUSA
+    PENDIENTE, COMENZADO, TERMINADO, PAUSADO
 }
 
 // Renombramos la data class a MediaItem
