@@ -67,7 +67,7 @@ class RegisterActivity : AppCompatActivity() {
                             Toast.LENGTH_LONG
                         ).show()
                         finish()
-                    }.onFailure {
+                    }.onFailure { error ->
                         // Si el registro falla, mostramos un Toast con el mensaje de error.
                         Toast.makeText(this@RegisterActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                     }
