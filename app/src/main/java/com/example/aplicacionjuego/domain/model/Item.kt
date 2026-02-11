@@ -20,6 +20,8 @@ data class MediaItem(
     val opinion: String = "",
     val categoria: Categoria = Categoria.JUEGO
 ) {
+
+    //para pasar a json
     fun toJSONObject(): JSONObject {
         return JSONObject().apply {
             put("id", id)
